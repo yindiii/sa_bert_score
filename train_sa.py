@@ -68,9 +68,8 @@ def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     scorer = SoftAlignScorer(model_type="roberta-large",
-                             tau=0.07,               # can stay fixed
-                             n_sink=12, learn_weights=True).to(device)
-    freeze_backbone(scorer)                          # only MLP & τ train
+                          tau=0.07, n_sink=12, learn_weights=True,
+                          idf=False).to(device)
     optim = torch.optim.AdamW(
         [p for p in scorer.parameters() if p.requires_grad], lr=3e-4)
 

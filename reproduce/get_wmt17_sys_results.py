@@ -119,6 +119,8 @@ def main():
     )
     parser.add_argument("--idf", action="store_true")
     parser.add_argument("-b", "--batch_size", type=int, default=64)
+    parser.add_argument("--scorer_path", type=str, required=True,
+                        help="*.pt file saved by train_sa.py")
     parser.add_argument(
         "--lang_pairs",
         nargs="+",
@@ -139,10 +141,15 @@ def main():
 
     print(args.model)
     for model_type in args.model:
-        scorer = SoftAlignScorer(model_type=model_type,
-                            tau=0.07, n_sink=12,
-                            idf=False,
-                            learn_weights=True)
+        if args.scorer_path:
+            scorer = SoftAlignScorer.from_pretrained(
+            args.scorer_path,               # ← the .pt file
+            model_type=model_type,          # 'roberta-large'
+            n_sink=12, tau=0.07,
+            idf=args.idf)
+        else:
+            from bert_score.scorer import BERTScorer
+            scorer = BERTScorer(model_type=model_type, idf=args.idf)
         results = defaultdict(dict)
         for lang_pair in tqdm(args.lang_pairs):
             scores, gold_scores = get_wmt17_sys_bert_score(
