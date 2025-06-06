@@ -8,6 +8,7 @@ import pandas as pd
 import torch
 from scipy.stats import pearsonr
 from tqdm.auto import tqdm, trange
+from bert_score.softalign_scorer import SoftAlignScorer
 
 import bert_score
 
@@ -138,7 +139,10 @@ def main():
 
     print(args.model)
     for model_type in args.model:
-        scorer = bert_score.scorer.BERTScorer(model_type=model_type, idf=args.idf)
+        scorer = SoftAlignScorer(model_type=model_type,
+                            tau=0.07, n_sink=12,
+                            idf=False,
+                            learn_weights=True)
         results = defaultdict(dict)
         for lang_pair in tqdm(args.lang_pairs):
             scores, gold_scores = get_wmt17_sys_bert_score(
